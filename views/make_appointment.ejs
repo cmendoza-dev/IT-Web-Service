@@ -154,44 +154,14 @@
                 <div class="form_section">
                   <form class="form_contant" action="">
                     <fieldset class="row">
-                      <!-- <style>
-                        #messages {
-                          list-style-type: none;
-                          margin: 0;
-                          padding: 0;
-                        }
-
-                        #messages li {
-                          padding: 10px;
-                          background-color: #f0f0f0;
-                          margin-bottom: 5px;
-                          border-radius: 5px;
-                        }
-
-                        #messages li:nth-child(even) {
-                          background-color: #e0e0e0;
-                        }
-
-                        #messages li:before {
-                          content: "\2022";
-                          /* Utiliza un punto como marcador de lista */
-                          color: #555;
-                          font-size: 20px;
-                          display: inline-block;
-                          width: 1em;
-                          margin-left: -1em;
-                          /* Alinea el marcador */
-                        }
-                      </style> -->
-                      <ul id="messages"></ul>
                       <div class="field col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <ul id="messages"></ul>
                         <textarea id="m" autocomplete="off" class="field_custom" placeholder="¿Algún comentario?"
                           required></textarea>
-                      </div>
-                      <div class="center">
-                        <button class="btn main_bt">ENVIAR AHORA</button>
+                        <button id="enviar" class="btn main_bt">ENVIAR AHORA</button>
                       </div>
                     </fieldset>
+
                   </form>
                 </div>
               </div>
@@ -201,6 +171,51 @@
       </div>
     </div>
   </div>
+
+  <style>
+    .field_custom {
+      width: calc(100% - 80px);
+      height: 100px;
+      float: left;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-bottom: 10px;
+    }
+
+    li {
+      border-radius: 5px;
+      padding: 10px;
+      margin: 5px;
+      max-width: 70%;
+    }
+
+    .sent {
+      background-color: #4CAF50;
+      color: white;
+      float: right;
+    }
+
+    .received {
+      background-color: #f9f9f9;
+    }
+
+    .btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+    }
+
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
 
   <!-- Modal -->
   <div class="modal fade" id="search_bar" role="dialog">
@@ -440,20 +455,24 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script>
-    $(function () {
-      var socket = io();
+$(function () {
+    var socket = io();
 
-      $('form').submit(function () {
-        socket.emit('chat message', $('#m').val());
+    $('#enviar').click(function () {
+        var mensaje = $('#m').val();
+        $('#messages').append($('<li class="sent">').text(mensaje));
+        socket.emit('chat message', {txt: mensaje, date: new Date()});
         $('#m').val('');
         return false;
-      });
-
-      socket.on('recibido', function (objeto) {
-        $('#messages').append($('<li>').text(objeto.txt + ' - ' + objeto.date));
-        window.scrollTo(0, document.body.scrollHeight);
-      });
     });
+
+    socket.on('recibido', function (objeto) {
+        $('#messages').append($('<li class="received">').text(objeto.txt + ' - ' + objeto.date));
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+});
+
+
 
   </script>
 </body>
