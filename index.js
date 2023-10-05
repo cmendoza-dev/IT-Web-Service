@@ -1,8 +1,14 @@
 const express = require('express');
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const path = require('path');
 
-app.use(express.static('public'));
-app.set('view engine', 'ejs'); // Configura EJS como el motor de plantillas
+// Configura EJS como el motor de plantillas
+app.set('view engine', 'ejs');
+
+// Sirve archivos estáticos desde el directorio 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configura las rutas
 const indexRoute = require('./routes/index');
@@ -65,9 +71,25 @@ app.use('/it_techn_support', technSupportRoute);
 app.use('/it_term_condition', termConditionRoute);
 app.use('/make_appointment', makeAppointmentRoute);
 
+// Maneja la conexión de Socket.IO
+io.on('connection', (socket) => {
+  console.log('Un cliente se ha conectado');
 
+  // Escucha los mensajes del cliente
+  socket.on('chat message', function (mensaje) {
+    console.log('Recibí: ' + mensaje);
+
+    // Emite el mensaje a todos los clientes
+    io.emit('recibido', {
+      date: new Date(),
+      txt: mensaje
+    });
+  });
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+// Escucha en el puerto
+http.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
